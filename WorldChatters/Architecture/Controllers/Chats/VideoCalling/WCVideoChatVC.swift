@@ -9,16 +9,11 @@
 import UIKit
 import OpenTok
 
-
 // Replace with your OpenTok API key
 var kApiKey = "46312072"
 // Replace with your generated session ID
 var kSessionId = "1_MX40NjMxMjA3Mn5-MTU2MzM5MzczNDMyMH5KWFJwSjBXYkZNT0xSbHl1eUNGRUFCOWN-fg"
 // Replace with your generated token
-
-//// Subscriber
-//var kToken = "T1==cGFydG5lcl9pZD00NjMxMjA3MiZzaWc9NTlhODBjY2VlYWVhZWFiNjJiMDI1ZmI3OTU3YzMxODU1Zjg4MWE2YTpzZXNzaW9uX2lkPTFfTVg0ME5qTXhNakEzTW41LU1UVTJNek01TXpjek5ETXlNSDVLV0ZKd1NqQlhZa1pOVDB4U2JIbDFlVU5HUlVGQ09XTi1mZyZjcmVhdGVfdGltZT0xNTYzMzk2Mjc3Jm5vbmNlPTAuNTQ1Njc5NDYwMjc3OTE5NiZyb2xlPXN1YnNjcmliZXImZXhwaXJlX3RpbWU9MTU2NTk4ODI3NSZpbml0aWFsX2xheW91dF9jbGFzc19saXN0PQ=="
-
 
 // Publishers
 var kToken = "T1==cGFydG5lcl9pZD00NjMxMjA3MiZzaWc9YTM4NjUyNjAwY2YzZjY5YTYwZTM0MmEwY2UzMDM4NzBhOGI0MjE1NDpzZXNzaW9uX2lkPTFfTVg0ME5qTXhNakEzTW41LU1UVTJNek01TXpjek5ETXlNSDVLV0ZKd1NqQlhZa1pOVDB4U2JIbDFlVU5HUlVGQ09XTi1mZyZjcmVhdGVfdGltZT0xNTYzMzk2MjMxJm5vbmNlPTAuNjQwMjgxMTUyMTExMjY3JnJvbGU9cHVibGlzaGVyJmV4cGlyZV90aW1lPTE1NjU5ODgyMzAmaW5pdGlhbF9sYXlvdXRfY2xhc3NfbGlzdD0="
@@ -26,116 +21,6 @@ var kToken = "T1==cGFydG5lcl9pZD00NjMxMjA3MiZzaWc9YTM4NjUyNjAwY2YzZjY5YTYwZTM0Mm
 let kWidgetHeight = 240
 let kWidgetWidth = 320
 
-//class WCVideoChatVC: UIViewController {
-//    var session: OTSession?
-//    var publisher: OTPublisher?
-//    var subscriber: OTSubscriber?
-//
-//    override func viewDidLoad() {
-//        super.viewDidLoad()
-//
-//        self.setupConnection()
-//
-//    }
-//    @IBAction func cancelBtn(_ sender: Any) {
-////        var Error : OTError?
-////        session?.disconnect(&Error)
-//
-//    }
-//
-//    //MARK: - setupConnection
-//    func setupConnection() {
-//        session = OTSession(apiKey: TokboxKeys.kApiKey, sessionId: TokboxKeys.kSessionId, delegate: self)
-//        var error: OTError?
-//        session?.connect(withToken: TokboxKeys.kToken, error: &error)
-//        if error != nil {
-//            print(error!)
-//        }
-//    }
-//
-//    //MARK:- OTPublisher
-//    func setOTPublisher(){
-//        let settings = OTPublisherSettings()
-//        settings.name = UIDevice.current.name
-//        guard let publisher = OTPublisher(delegate: self, settings: settings) else {
-//            return
-//        }
-//
-//        var error: OTError?
-//        session?.publish(publisher, error: &error)
-//        guard error == nil else {
-//            print(error!)
-//            return
-//        }
-//
-//        guard let publisherView = publisher.view else {return}
-//        publisherView.frame = CGRect(x: ScreenSize.kScreenWidth - 150 - 20, y: ScreenSize.kScreenHeight - 150 - 20, width: 150, height: 150)
-//        view.addSubview(publisherView)
-//    }
-//
-//    //MARK:- OTSubscriber
-//    func setOTSubscriber(stream: OTStream){
-//        subscriber = OTSubscriber(stream: stream, delegate: self)
-//        guard let subscriber = subscriber else {
-//            return
-//        }
-//
-//        var error: OTError?
-//        session?.subscribe(subscriber, error: &error)
-//        guard error == nil else {
-//            print(error!)
-//            return
-//        }
-//
-//        guard let subscriberView = subscriber.view else {return}
-//        subscriberView.frame = UIScreen.main.bounds
-//        view.insertSubview(subscriberView, at: 0)
-//    }
-//}
-//
-//extension WCVideoChatVC:OTSessionDelegate{
-//    func sessionDidConnect(_ session: OTSession) {
-//        print("The client connected to the OpenTok session.")
-//        setOTPublisher()
-//    }
-//
-//    func sessionDidDisconnect(_ session: OTSession) {
-//        print("The client disconnected from the OpenTok session.")
-//
-//        self.dismiss(animated: true, completion: nil)
-//    }
-//
-//    func session(_ session: OTSession, didFailWithError error: OTError) {
-//        print("The client failed to connect to the OpenTok session: \(error).")
-//    }
-//
-//    func session(_ session: OTSession, streamCreated stream: OTStream) {
-//         print("A stream was created in the session.")
-//        setOTSubscriber(stream: stream)
-//    }
-//
-//    func session(_ session: OTSession, streamDestroyed stream: OTStream) {
-//         print("A stream was destroyed in the session.")
-//    }
-//}
-//
-//// MARK: - OTPublisherDelegate callbacks
-//extension WCVideoChatVC:OTPublisherKitDelegate{
-//    func publisher(_ publisher: OTPublisherKit, didFailWithError error: OTError) {
-//        print("The publisher failed: \(error)")
-//    }
-//}
-//
-//// MARK: - OTSubscriberDelegate callbacks
-//extension WCVideoChatVC:OTSubscriberKitDelegate{
-//    func subscriberDidConnect(toStream subscriber: OTSubscriberKit) {
-//          print("The subscriber did connect to the stream.")
-//    }
-//
-//    func subscriber(_ subscriber: OTSubscriberKit, didFailWithError error: OTError) {
-//         print("The subscriber failed to connect to the stream.")
-//    }
-//}
 
 class WCVideoChatVC: UIViewController {
     lazy var session: OTSession = {

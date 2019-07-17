@@ -72,11 +72,7 @@ extension WCReadersVC:UITableViewDelegate,UITableViewDataSource
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath)
     {
-        //        index = indexPath.row
-        //        self.questionDataValue = self.questionData[indexPath.row]
-        //
-        //        tableView.reloadData()
-        
+
     }
     
 }
