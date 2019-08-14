@@ -24,7 +24,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             registerApns(application: application)
         }
         setNavigationBar()
-//        showMainController()
+        //        showMainController()
         return true
     }
     
@@ -50,9 +50,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
     }
     
-    class var sharedDelegate:AppDelegate {
-        return (UIApplication.shared.delegate as? AppDelegate)!
-    }
     
     
 }
@@ -65,8 +62,6 @@ extension AppDelegate {
         if let font : UIFont = OpenSans.Semibold.font(size: 20){
             UINavigationBar.appearance().titleTextAttributes = [NSAttributedString.Key.font: font, NSAttributedString.Key.foregroundColor : UIColor.white]
         }
-        
-        
         
         //UINavigationBar.appearance().barTintColor = #colorLiteral(red: 0, green: 0, blue: 0, alpha: 0.4962375383)
         UINavigationBar.appearance().tintColor = .white
@@ -83,12 +78,8 @@ extension AppDelegate {
             }
             
         }
-            UINavigationBar.appearance().shadowImage = UIImage()
-           UIBarButtonItem.appearance().setBackButtonTitlePositionAdjustment(UIOffset.init(horizontal: 0, vertical: -220), for:.default)
-        
-        
-        
-        
+        UINavigationBar.appearance().shadowImage = UIImage()
+        UIBarButtonItem.appearance().setBackButtonTitlePositionAdjustment(UIOffset.init(horizontal: 0, vertical: -220), for:.default)
         
     }
 }
@@ -162,11 +153,8 @@ extension AppDelegate{
                 UIUserNotificationSettings(types: [.alert, .badge, .sound], categories: nil)
             application.registerUserNotificationSettings(settings)
         }
+        
         application.registerForRemoteNotifications()
-        
-        
-        
-        
         
         
     }
@@ -187,14 +175,26 @@ extension AppDelegate{
         // Envoi le token vers votre serveur.
         print("\n\n /**** TOKEN DATA ***/ \(deviceToken) \n\n")
         let deviceTokenString = deviceToken.reduce("", {$0 + String(format: "%02X", $1)})
+        
+        UserDefaults.standard.set(deviceTokenString, forKey: "deviceToken")
+        UserDefaults.standard.synchronize()
+        
+        print(getDeviceToken())
         print("\n\n /**** TOKEN STRING ***/ \(deviceTokenString) \n\n")
-       
+        
         
     }
     func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
         print("APNs registration failed: \(error)")
     }
-    
+    func getDeviceToken() -> String
+    {
+        if let deviceToken =   UserDefaults.standard.object(forKey: "deviceToken")  as? String
+        {
+            return deviceToken
+        }
+        return ""
+    }
 }
 extension AppDelegate:UNUserNotificationCenterDelegate{
     
@@ -236,7 +236,7 @@ extension AppDelegate:UNUserNotificationCenterDelegate{
         if isLogin{
             
             let objNotiVM = WCNotificationViewModel(parse: apnsResponse)
-            UIApplication.shared.applicationIconBadgeNumber = objNotiVM.badge
+           // UIApplication.shared.applicationIconBadgeNumber = objNotiVM.badge
             return manage(notiResponse: objNotiVM, userAction: userAction)
         }else{
             return false
@@ -245,12 +245,51 @@ extension AppDelegate:UNUserNotificationCenterDelegate{
     }
     fileprivate func manage(notiResponse objNotiVM:WCNotificationViewModel,userAction:Bool)->Bool{
         guard let notificationController = rootController as? UINavigationController , let visibleViewController = notificationController.visibleViewController else { return false }
+        if visibleViewController.isKind(of: WCVideoChatVC.self)
+        {
+            //same Controller
+//            if let object  = objNotiVM.objNotification
+//            {
+//                if object.callStatus == "disconnected"
+//                {
+//                    let videoChatController = WCVideoChatVC.instance(from: .Main)
+//                    videoChatController.callDisconnect()
+////                    let dashboardController  = UINavigationController.instance(from: .Main, withIdentifier: StoryBoardIdentity.kMessagesListNavigationVC)
+////                    dashboardController.popToViewController(dashboardController, animated: true)
+//                }
+//            }
+            return false
+        }
+        else{
+            if let object  = objNotiVM.objNotification
+            {
+                if object.callStatus == "connected"
+                {
+                let videoChatController = WCVideoChatVC.instance(from: .Main)
+                videoChatController.readerViewModel = objNotiVM.readerViewModel
+                videoChatController.videoChatViewModel.setNotificationData(obj: object)
+                videoChatController.callerType = objNotiVM.isOwner == true ?  .sender : .receiver
+                videoChatController.isNotifcation = true
+                    if object.callType == "audio"
+                    {
+                        videoChatController.callType = "audio"
+                    }else{
+                        videoChatController.callType = "video"
+                    }
+                    
+                visibleViewController.navigationController?.pushViewController(videoChatController, animated: true)
+                }
+                else{
+                    
+//                    let videoChatController = WCVideoChatVC.instance(from: .Main)
+//                    videoChatController.callDisconnect()
+                }
+            }
+        }
+        
         return false
         
-        
-        
     }
-    
 }
 
 extension AppDelegate{
@@ -266,25 +305,30 @@ extension AppDelegate{
     }
     
     func setupLogin(){
-      let loginNavigation =  UINavigationController.instance(from: .Main, withIdentifier: StoryBoardIdentity.KLoginNavigationVC)
+        let loginNavigation =  UINavigationController.instance(from: .Main, withIdentifier: StoryBoardIdentity.KLoginNavigationVC)
         self.window?.rootViewController = loginNavigation
     }
-    func setupDashBooard(){
+    func setupDashBooardSubscriber(){
         let dashboardController  = UINavigationController.instance(from: .Main, withIdentifier: StoryBoardIdentity.kCategoryNavigationVC)
         self.window?.rootViewController = dashboardController
     }
-    
-    func showMainController()
-    {
-         setupDashBooard()
-//        if isLogin
-//        {
-//            setupDashBooard()
-//        }
-//        else{
-//            setupLogin()
-//        }
+    func setupDashBooardPsychic(){
+        let dashboardController  = UINavigationController.instance(from: .Main, withIdentifier: StoryBoardIdentity.kMessagesListNavigationVC)
+        self.window?.rootViewController = dashboardController
     }
+    
+//    func showMainController()
+//    {
+//        setupDashBooardPsychic()
+//        //        if isLogin
+//        //        {
+//        //            setupDashBooard()
+//        //        }
+//        //        else{
+//        //            setupLogin()
+//        //        }
+//    }
+    
 }
 
 extension UIApplication {

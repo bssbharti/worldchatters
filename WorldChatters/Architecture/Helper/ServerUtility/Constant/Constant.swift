@@ -71,10 +71,11 @@ var alertMessage: String? {
 var userModel:WCUserModel?{
     set{
         guard let  model = newValue else { return }
-        UserDefaults.set(archivedObject: model, forKey: kUserDataKey)
+        UserDefaults.set(encoder: model, forKey: kUserDataKey)
+        
     }
     get{
-        guard let model = UserDefaults.get(unarchiverObject: WCUserModel.self, forKey: kUserDataKey)else { return nil }
+        guard let model = UserDefaults.get(decoder: WCUserModel.self, forKey: kUserDataKey) else { return nil }
         return model
     }
     
@@ -121,9 +122,11 @@ var kBaseUrl               = "https://coagle.com/api/?action="
 
 // Web Service name
 
-var kLogin                    = "login"
-var kReadersData              = "readers-data"
-var kReaderProfile            = "reader-profile"
+var kLogin                    = kBaseUrl+"login"
+var kReadersData              = kBaseUrl+"readers-data"
+var kReaderProfile            = kBaseUrl+"reader-profile"
+var kCallInitiate             = kBaseUrl+"call-initiate"
+var kCallReject               = kBaseUrl+"call-reject"
 
 
 

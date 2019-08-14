@@ -9,36 +9,144 @@
 import UIKit
 import OpenTok
 
-// Replace with your OpenTok API key
-var kApiKey = "46312072"
-// Replace with your generated session ID
-var kSessionId = "1_MX40NjMxMjA3Mn5-MTU2MzM5MzczNDMyMH5KWFJwSjBXYkZNT0xSbHl1eUNGRUFCOWN-fg"
-// Replace with your generated token
 
-// Publishers
-var kToken = "T1==cGFydG5lcl9pZD00NjMxMjA3MiZzaWc9YTM4NjUyNjAwY2YzZjY5YTYwZTM0MmEwY2UzMDM4NzBhOGI0MjE1NDpzZXNzaW9uX2lkPTFfTVg0ME5qTXhNakEzTW41LU1UVTJNek01TXpjek5ETXlNSDVLV0ZKd1NqQlhZa1pOVDB4U2JIbDFlVU5HUlVGQ09XTi1mZyZjcmVhdGVfdGltZT0xNTYzMzk2MjMxJm5vbmNlPTAuNjQwMjgxMTUyMTExMjY3JnJvbGU9cHVibGlzaGVyJmV4cGlyZV90aW1lPTE1NjU5ODgyMzAmaW5pdGlhbF9sYXlvdXRfY2xhc3NfbGlzdD0="
 
 let kWidgetHeight = 240
 let kWidgetWidth = 320
 
-
 class WCVideoChatVC: UIViewController {
-    lazy var session: OTSession = {
-        return OTSession(apiKey: kApiKey, sessionId: kSessionId, delegate: self)!
-    }()
     
-    lazy var publisher: OTPublisher = {
+    
+    fileprivate lazy var publisher: OTPublisher = {
         let settings = OTPublisherSettings()
+        
         settings.name = UIDevice.current.name
         return OTPublisher(delegate: self, settings: settings)!
     }()
+    fileprivate var subscriber: OTSubscriber?
+    fileprivate var callStatus:WCCallStatus  = .none
+    @IBOutlet var videoChatViewModel: WCVideoChatViewModel!
+    var isStreamCreated:Bool = false
     
-    var subscriber: OTSubscriber?
+    var readerViewModel: WCReaderViewModel!
+    var isNotifcation:Bool = false
+    var callerType:WCCallerType  = .sender
+    var callType = ""
     
-    override func viewDidLoad() {
+    @IBOutlet fileprivate var remoteVideo: UIView!
+    @IBOutlet fileprivate var localVideo: UIView!
+    @IBOutlet var callConnectBtn: UIButton!
+    @IBOutlet var callStatusLbl: UILabel!
+    @IBOutlet var callBackgroundImage: UIImageView!
+    @IBOutlet var callUserNameLbl: UILabel!
+    
+    
+    let customAudioDevice = DefaultAudioDevice()
+    
+    
+    override func viewDidLoad()
+    {
         super.viewDidLoad()
+        loadViewChatData()
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(true)
+        self.navigationController?.setNavigationBarHidden(true, animated: animated)
+    }
+    fileprivate func loadViewChatData(){
         
-        doConnect()
+        if !isNotifcation {
+            guard let readerVM = self.readerViewModel else {return}
+            
+            self.callConnectBtn.setImage(nil, for: .normal)
+            callConnectBtn.isUserInteractionEnabled = false
+            callStatusLbl.text                      = "Calling..."
+            localVideo.isHidden                     = true
+            remoteVideo.isHidden                    = true
+            callUserNameLbl.text                    = readerViewModel.readerModel?.readerName
+            isStreamCreated                         = true
+            
+            videoChatViewModel.setReaderView(readerVM) {
+                //                switch self.callerType {
+                //                case .sender:
+                self.videoChatViewModel.videoCallInitiate(calltype: self.callType) {
+                  
+                   DispatchQueue.main.async {
+                        self.callStatus = self.videoChatViewModel.callStatus
+                        print("------- Succelfully dadasdasdasd kmaklsmd==--- ----------")
+                        OTAudioDeviceManager.setAudioDevice(self.customAudioDevice)
+                        self.doConnect()
+                        
+                    }
+                }
+                
+                
+                
+                //                default:
+                //                    break
+                //                }
+                
+            }
+        }else{
+            //            switch self.callerType {
+            //            case .sender:
+            //                self.videoChatViewModel.videoCallInitiate {
+            //                    DispatchQueue.main.async {
+            //                        self.callStatus = self.videoChatViewModel.callStatus
+            //                        print("------- Succelfully dadasdasdasd kmaklsmd==--- ----------")
+            //
+            //                        self.doConnect()
+            //
+            //                    }
+            //                }
+            //            case .receiver:
+            //                self.callStatus = self.videoChatViewModel.callStatus
+            //                print("------- Succelfully dadasdasdasd kmaklsmd==--- ----------")
+            
+            
+            callConnectBtn.isUserInteractionEnabled = true
+            localVideo.isHidden                     = true
+            remoteVideo.isHidden                    = true
+            callStatusLbl.text                      = "Incoming Call..."
+            callUserNameLbl.text                    = videoChatViewModel.videoChatModel?.callerName
+            
+            
+            
+            //            }
+            
+        }
+        
+        
+    }
+    func callDisconnect()
+    {
+        self.navigationController?.popViewController(animated: true)
+        //        var error: OTError?
+        //        guard let session = videoChatViewModel.session else { return  }
+        //        session.disconnect(&error)
+        //        videoChatViewModel.videoCallReject {
+        //
+        //        }
+    }
+    @IBAction func callConnectBtn(_ sender: Any){
+        self.callConnectBtn.setImage(nil, for: .normal)
+        callConnectBtn.isUserInteractionEnabled = false
+        OTAudioDeviceManager.setAudioDevice(self.customAudioDevice)
+        self.doConnect()
+    }
+    @IBAction func disconnectBtn(_ sender: Any) {
+        var error: OTError?
+        guard let session = videoChatViewModel.session else { return  }
+        session.disconnect(&error)
+        
+        videoChatViewModel.videoCallReject {
+            if self.isStreamCreated == false
+            {
+                self.navigationController?.popViewController(animated: true)
+            }
+        }
+        
     }
     
     /**
@@ -46,12 +154,24 @@ class WCVideoChatVC: UIViewController {
      * expect a delegate method to call us back with the results of this action.
      */
     fileprivate func doConnect() {
+        if callType == "audio" {
+            publisher.publishVideo = false
+        }
+        else{
+            publisher.publishVideo = true
+        }
+        
+        guard let session = videoChatViewModel.session else { return  }
+        if session.delegate == nil {
+            session.delegate = self
+        }
+        
         var error: OTError?
         defer {
             processError(error)
         }
         
-        session.connect(withToken: kToken, error: &error)
+        session.connect(withToken: videoChatViewModel.videoSessionToken!, error: &error)
     }
     
     /**
@@ -60,6 +180,7 @@ class WCVideoChatVC: UIViewController {
      * to the OpenTok session.
      */
     fileprivate func doPublish() {
+        guard let session = videoChatViewModel.session else { return  }
         var error: OTError?
         defer {
             processError(error)
@@ -68,8 +189,8 @@ class WCVideoChatVC: UIViewController {
         session.publish(publisher, error: &error)
         
         if let pubView = publisher.view {
-            pubView.frame = CGRect(x: 0, y: 0, width: kWidgetWidth, height: kWidgetHeight)
-            view.addSubview(pubView)
+            pubView.frame = CGRect(x: 0, y: 0, width: 100, height: 150)
+            localVideo.addSubview(pubView)
         }
     }
     
@@ -80,6 +201,15 @@ class WCVideoChatVC: UIViewController {
      * add the subscriber only after it has connected and begins receiving data.
      */
     fileprivate func doSubscribe(_ stream: OTStream) {
+        if callType == "audio" {
+            subscriber?.subscribeToVideo = false
+        }
+        else{
+            subscriber?.subscribeToVideo = true
+        }
+        
+        
+        guard let session = videoChatViewModel.session else { return  }
         var error: OTError?
         defer {
             processError(error)
@@ -117,10 +247,31 @@ extension WCVideoChatVC: OTSessionDelegate {
     
     func sessionDidDisconnect(_ session: OTSession) {
         print("Session disconnected")
+        
+        self.navigationController?.popViewController(animated: true)
     }
     
     func session(_ session: OTSession, streamCreated stream: OTStream) {
         print("Session streamCreated: \(stream.streamId)")
+        isStreamCreated = true
+        
+        if callType == "audio" {
+            callStatusLbl.text            = "Connected"
+            callStatusLbl.isHidden        = false
+            callBackgroundImage.isHidden  = false
+            localVideo.isHidden           = true
+            remoteVideo.isHidden          = true
+            callUserNameLbl.isHidden      = false
+        }
+        else{
+            callStatusLbl.isHidden        = true
+            callBackgroundImage.isHidden  = true
+            localVideo.isHidden           = false
+            remoteVideo.isHidden          = false
+            callUserNameLbl.isHidden      = true
+        }
+        
+        
         if subscriber == nil {
             doSubscribe(stream)
         }
@@ -160,13 +311,92 @@ extension WCVideoChatVC: OTPublisherDelegate {
 // MARK: - OTSubscriber delegate callbacks
 extension WCVideoChatVC: OTSubscriberDelegate {
     func subscriberDidConnect(toStream subscriberKit: OTSubscriberKit) {
+        
+        print("Subscriber")
+        
         if let subsView = subscriber?.view {
-            subsView.frame = CGRect(x: 0, y: kWidgetHeight, width: kWidgetWidth, height: kWidgetHeight)
-            view.addSubview(subsView)
+            subsView.frame = CGRect(x: 0, y: 0, width: self.view.frame.width, height: self.view.frame.height)
+            remoteVideo.addSubview(subsView)
         }
     }
     
     func subscriber(_ subscriber: OTSubscriberKit, didFailWithError error: OTError) {
         print("Subscriber failed: \(error.localizedDescription)")
     }
+    func subscriberVideoDataReceived(_ subscriber: OTSubscriber) {
+         print("Subscriber -------------- Video ------------- Data Recieved")
+    }
+    
+ 
 }
+
+//extension WCVideoChatVC: OTAudioDevice {
+//    func captureFormat() -> OTAudioFormat {
+//        <#code#>
+//    }
+//
+//    func renderFormat() -> OTAudioFormat {
+//        <#code#>
+//    }
+//
+//    func renderingIsAvailable() -> Bool {
+//        <#code#>
+//    }
+//
+//    func initializeRendering() -> Bool {
+//        <#code#>
+//    }
+//
+//    func renderingIsInitialized() -> Bool {
+//        <#code#>
+//    }
+//
+//    func startRendering() -> Bool {
+//        <#code#>
+//    }
+//
+//    func stopRendering() -> Bool {
+//        <#code#>
+//    }
+//
+//    func isRendering() -> Bool {
+//        <#code#>
+//    }
+//
+//    func estimatedRenderDelay() -> UInt16 {
+//        <#code#>
+//    }
+//
+//    func captureIsAvailable() -> Bool {
+//        <#code#>
+//    }
+//
+//    func initializeCapture() -> Bool {
+//        <#code#>
+//    }
+//
+//    func captureIsInitialized() -> Bool {
+//        <#code#>
+//    }
+//
+//    func startCapture() -> Bool {
+//        <#code#>
+//    }
+//
+//    func stopCapture() -> Bool {
+//        <#code#>
+//    }
+//
+//    func isCapturing() -> Bool {
+//        <#code#>
+//    }
+//
+//    func estimatedCaptureDelay() -> UInt16 {
+//        <#code#>
+//    }
+//
+//
+//    func setAudioBus(_ audioBus: OTAudioBus?) -> Bool {
+//        return true
+//    }
+//}

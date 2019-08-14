@@ -9,35 +9,36 @@
 import UIKit
 
 struct WCReaderModel: Mappable {
-    let id:Int?
-    let name:String?
-    let email:String?
-    let readerImage:String?
-    let device_token:String?
+    let readerID: String?
+    let readerName: String?
+    let userRole: String?
+    let readerEmail: String?
+    let readerImage: String?
+    let deviceToken: String?
+    let status:String?
+    let description:String?
     enum CodingKeys:String,CodingKey {
-        case id = "readerId"
-        case name = "readerName"
-        case email = "readerEmail"
+        case readerID = "readerId"
+        case readerName = "readerName"
+        case readerEmail = "readerEmail"
         case readerImage = "readerImage"
-        case device_token = "device_token"
+        case deviceToken = "device_token"
+        case userRole = "user_role"
+        case status = "status"
+        case description
     }
     
     init(from decoder:Decoder) throws {
         let values = try decoder.container(keyedBy:CodingKeys.self)
-        id = try values.decodeIfPresent(Int.self, forKey: .id)
-        name = try values.decodeIfPresent(String.self, forKey: .name)
-        email = try values.decodeIfPresent(String.self, forKey: .email)
-        readerImage = try values.decodeIfPresent(String.self, forKey: .readerImage)
-        device_token = try values.decodeIfPresent(String.self, forKey: .device_token)
+        readerID = try? values.decodeIfPresent(String.self, forKey: .readerID)
+        readerName = try? values.decodeIfPresent(String.self, forKey: .readerName)  ?? ""
+        readerEmail = try? values.decodeIfPresent(String.self, forKey: .readerEmail)  ?? ""
+        readerImage = try? values.decodeIfPresent(String.self, forKey: .readerImage)  ?? ""
+        deviceToken = try? values.decodeIfPresent(String.self, forKey: .deviceToken)  ?? ""
+        userRole = try? values.decodeIfPresent(String.self, forKey: .userRole) ?? ""
+        status = try? values.decodeIfPresent(String.self, forKey: .status)  ?? ""
+        description = try? values.decodeIfPresent(String.self, forKey: .description) ?? ""
     }
     
-    func encoder(encoder:Encoder) throws
-    {
-        var container = encoder.container(keyedBy: CodingKeys.self)
-        try container.encode(id, forKey: .id)
-        try container.encode(name, forKey: .name)
-        try container.encode(email, forKey: .email)
-        try container.encode(readerImage, forKey: .readerImage)
-        try container.encode(device_token, forKey: .device_token)
-    }
+   
 }

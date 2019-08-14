@@ -63,7 +63,11 @@ private struct JSNParser:Equatable{
     static func decoder<T>(_ type:T.Type,from data:Data)->(object:T?,error:Error?) where T:Decodable{
         do{
             let decoder  = JSONDecoder()
-            decoder.keyDecodingStrategy = .convertFromSnakeCase
+            if #available(iOS 10.0, OSX 10.12, tvOS 10.0, watchOS 3.0, *) {
+                decoder.dateDecodingStrategy = .iso8601
+            }else{
+                 decoder.keyDecodingStrategy = .convertFromSnakeCase
+            }
             let obj  = try decoder.decode(T.self, from: data)
             return (obj , nil)
         }catch {
@@ -73,7 +77,12 @@ private struct JSNParser:Equatable{
     static func encoder<T>(_ value: T)->(data:Data?,error:Error?) where T : Encodable{
         do{
             let encoder =  JSONEncoder()
-            encoder.outputFormatting = .prettyPrinted
+            
+            if #available(iOS 10.0, OSX 10.12, tvOS 10.0, watchOS 3.0, *) {
+                encoder.dateEncodingStrategy = .iso8601
+            }else{
+                encoder.outputFormatting = .prettyPrinted
+            }
             let encodeData  = try encoder.encode(value)
             return (encodeData,nil)
         }catch{

@@ -19,26 +19,28 @@ class UserViewModel:NSObject
         }else if password.isEmpty{
             alertMessage = FieldValidation.kPasswordEmpty
         }else{
-            let params = ["user_name":email, "password":password, "apiType":"wpType", "device_token":"423546567567734523234"]
+            let token = AppDelegate.shared.getDeviceToken()
+            let params = ["user_name":email, "password":password, "apiType":"wpType", "device_token":token]
             Server.Request.dataTask(method: .post) { (result) in
                 switch result{
                 case .success(let data, let code):
                     async {
                         SMUtility.shared.hideHud()
-                        guard let response = data.JKDecoder(WCResponseModel<WCUserModel>.self).object else{return}
+                        guard let response = data.JKDecoder(WCUserResponse.self).object else{return}
                         print("THE RESPONSE IS THE-------------->",response)
-                        switch code{
-                        case .OK:
-                            
-                            let isSuccess = response.isSuccess
-                            if isSuccess{
+                        switch response.code{
+                        case 200:
                                 guard let user = response.object else{return}
+                                
                                 userModel = user
                                 onSuceess()
-                            }else{
+                            
+                        case 400:
+                            DispatchQueue.main.async {
                                 alertMessage = response.message
+                                
                             }
-                        case .Unauthorized:
+                        case 201:
                             DispatchQueue.main.async {
                                 alertMessage = response.message
                                 
@@ -61,7 +63,7 @@ class UserViewModel:NSObject
                     }
                     
                 }
-            }.request(request: kBaseUrl + kLogin , headers: nil, params: params)
+            }.request(request:  kLogin , headers: nil, params: params)
            
 
             

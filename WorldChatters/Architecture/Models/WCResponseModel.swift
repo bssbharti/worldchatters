@@ -16,14 +16,14 @@ struct WCResponseModel<T:Mappable>:Mappable{
         case status = "Status"
         case message = "msg"
         case object = "data"
-        case code
+        case code = "code"
     }
     init(from decoder:Decoder) throws {
         let values = try decoder.container(keyedBy:CodingKeys.self)
-        code = try values.decodeIfPresent(Int.self, forKey: .code)
-        status = try values.decodeIfPresent(String.self, forKey: .status)
-        message = try values.decodeIfPresent(String.self, forKey: .message)
-        object = try values.decodeIfPresent(T.self, forKey: .object)
+        code = try? values.decodeIfPresent(Int.self, forKey: .code)
+        status = try? values.decodeIfPresent(String.self, forKey: .status)
+        message = try? values.decodeIfPresent(String.self, forKey: .message)
+        object = try? values.decodeIfPresent(T.self, forKey: .object)
        
     }
     var isSuccess:Bool{
@@ -36,7 +36,7 @@ struct WCResponseModel<T:Mappable>:Mappable{
         try container.encode(status, forKey: .status)
         try container.encode(message, forKey: .message)
         try container.encode(object, forKey: .object)
-       
+        try container.encode(code,forKey: .code)
         
         
     }

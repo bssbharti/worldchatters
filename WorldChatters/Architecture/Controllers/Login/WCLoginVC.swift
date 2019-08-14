@@ -13,6 +13,7 @@ class WCLoginVC: UIViewController {
     @IBOutlet fileprivate weak var passwordTF:JKTextField!
     
     @IBOutlet var objUserViewModel: UserViewModel!
+   
     
     override func loadView() {
         super.loadView()
@@ -28,7 +29,16 @@ class WCLoginVC: UIViewController {
     @IBAction fileprivate func onSingin(_ sender:Any){
         guard let email = emailTF.text , let password = passwordTF.text else { return  }
         objUserViewModel.login(email: email, password: password, onSuceess: {
-            AppDelegate.shared.showMainController()
+            
+        if userModel?.userRole == "psychic"
+        {
+            AppDelegate.shared.setupDashBooardPsychic()
+        }
+        else
+        {
+            AppDelegate.shared.setupDashBooardSubscriber()
+        }
+            
             
         })
     }

@@ -19,7 +19,6 @@ class WCCategoryCell: UITableViewCell {
 
     override func setSelected(_ selected: Bool, animated: Bool) {
         super.setSelected(selected, animated: animated)
-
         // Configure the view for the selected state
     }
 
@@ -50,11 +49,8 @@ class WCReadersCell: UITableViewCell {
     
     var model:WCReaderModel?{
         didSet{
-            userNameLbl.text = model?.name ?? ""
-            userEmailLbl.text = model?.email ?? ""
-            
+            userNameLbl.text = model?.readerName ?? ""
+            userEmailLbl.text = model?.readerEmail ?? ""
         }
     }
-    
-
 }

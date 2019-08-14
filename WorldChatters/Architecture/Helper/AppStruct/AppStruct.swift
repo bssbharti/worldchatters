@@ -92,7 +92,7 @@ struct SegueIdentity {
     static let kForgotPasswordSegue           = "ForgotPasswordSegue"
     static let kConfirmForgotPasswordSegue    = "ConfirmForgotPasswordSegue"
     static let kCategorySegue                 = "CategorySegue"
-    static let kReaderSegue                   = "ReaderSegue"
+    static let kReadersSegue                  = "ReadersSegue"
     static let kReaderProfileSegue            = "ReaderProfileSegue"
     static let kVoiceCallingSegue             = "VoiceCallingSegue"
     static let kCallActivitySegue             = "CallActivitySegue"
@@ -106,6 +106,8 @@ struct StoryBoardIdentity {
     static let kForgotVC                = "ForgotVC"
     static let kCategoryVC              = "CategoryVC"
     static let kCategoryNavigationVC    = "CategoryNavigationVC"
+    static let kMessagesListNavigationVC = "MessagesListNavigationVC"
+    static let WCVideoChatVC = "WCVideoChatVC"
   
 }
 

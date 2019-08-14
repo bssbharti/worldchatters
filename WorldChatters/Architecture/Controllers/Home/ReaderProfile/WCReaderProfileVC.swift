@@ -10,23 +10,51 @@ import UIKit
 import OpenTok
 
 class WCReaderProfileVC: UIViewController {
-    
-    @IBOutlet fileprivate var readerProfileViewModel: WCReaderProfileViewModel!
+    @IBOutlet fileprivate var readerImageView: JKImageView!
+    @IBOutlet fileprivate var readerNamelbl: UILabel!
+    @IBOutlet fileprivate var readerStatuslbl: UILabel!
+    @IBOutlet fileprivate var readerDescTV: UITextView!
+    @IBOutlet fileprivate var readerEmaillbl: UILabel!
+    var readerViewModel: WCReaderViewModel!
+    var selectedIndexPath:IndexPath!
     @IBOutlet var tableView: UITableView!
-
+ 
+    
     override func viewDidLoad() {
         super.viewDidLoad()
+    
+        self.loadProfileData()
         
-        readerProfileViewModel.readerProfile {
+    }
+    fileprivate func loadProfileData(){
+        guard let indexPath = selectedIndexPath else { return  }
+        readerViewModel.readerProfile(at: indexPath) {
             async {
-                self.tableView.reloadData()
+                self.readerViewModel.realodReaderProfile(imageView: self.readerImageView, namelbl: self.readerNamelbl, statuslbl: self.readerStatuslbl, detailTV: self.readerDescTV ,emailLbl:self.readerEmaillbl)
             }
         }
     }
+    @IBAction func backBtn(_ sender: Any) {
+        self.navigationController?.popViewController(animated: true)
+    }
+    
+    @IBAction func audioBtn(_ sender: Any) {
+        
+        let vc = WCVideoChatVC.instance(from: .Main)
+        vc.readerViewModel = readerViewModel
+        vc.callerType = .sender
+        vc.isNotifcation = false
+        vc.callType = "audio"
+        self.navigationController?.pushViewController(vc, animated: true)
+    }
     
     @IBAction func videoBtn(_ sender: Any) {
-//        let vc = self.storyboard?.instantiateViewController(withIdentifier: "WCVideoChatVC") as? WCVideoChatVC
-//        self.present(vc!, animated: true, completion: nil)
+        let vc = WCVideoChatVC.instance(from: .Main)
+        vc.readerViewModel = readerViewModel
+        vc.callerType = .sender
+        vc.isNotifcation = false
+        vc.callType = "video"
+        self.navigationController?.pushViewController(vc, animated: true)
     }
 }
 
@@ -57,7 +85,7 @@ extension WCReaderProfileVC:UITableViewDelegate,UITableViewDataSource
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath)
     {
-       
+        
     }
     
 }

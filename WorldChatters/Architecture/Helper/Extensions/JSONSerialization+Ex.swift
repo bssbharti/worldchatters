@@ -27,8 +27,8 @@ extension JSONSerialization{
         return jsonString
     }
     //MARK:- getJsonData-
-    static func JSONData(Object:Any)->Data{
-        var data:Data!
+    static func JSONData(Object:Any)->Data?{
+        var data:Data?
         do{
             data = try self.data(withJSONObject: Object, options: [])
             

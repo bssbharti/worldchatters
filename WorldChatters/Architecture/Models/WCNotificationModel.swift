@@ -11,4 +11,5 @@ struct WCNotificationModel {
     var badge:Int!
     var notificationId:String!
     var notifType:String!
+    
 }

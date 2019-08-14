@@ -75,7 +75,6 @@ fileprivate class ServerManager: NSObject {
             switch(response.result) {
             case .success(_):
                 if response.result.value != nil{
-                    
                     self.responseTask(data: response.data, statusCode: response.response!.statusCode , onCompletionHandler: onCompletionHandler)
                     
                 
@@ -299,3 +298,25 @@ struct Server {
     
 }
 
+extension DataRequest {
+    fileprivate func decodableResponseSerializer<T: Decodable>() -> DataResponseSerializer<T> {
+        return DataResponseSerializer { _, response, data, error in
+            guard error == nil else { return .failure(error!) }
+            
+            guard let data = data else {
+                return .failure(AFError.responseSerializationFailed(reason: .inputDataNil))
+            }
+            let result  = data.JKDecoder(T.self)
+             if let object  = result.object{
+                 return Result {object }
+            }
+            return .failure(result.error!)
+        }
+    }
+    
+    @discardableResult
+    fileprivate func responseDecodable<T: Decodable>(queue: DispatchQueue? = nil, completionHandler: @escaping (DataResponse<T>) -> Void) -> Self {
+        return response(queue: queue, responseSerializer: decodableResponseSerializer(), completionHandler: completionHandler)
+    }
+    
+}
